@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+}
+
+// Use Java 11 since CP Docker images package Java 11 as of CP 7.3.x
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+version = "0.0.1"
+group = 'dev.tojoos'
+
+repositories {
+    mavenCentral()
+
+    maven {
+        url "https://packages.confluent.io/maven"
+    }
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'io.confluent.ksql:ksql-udf:5.4.11'
+    testImplementation 'junit:junit:4.13.2'
+}
+
+task copyJar(type: Copy) {
+    from jar
+    into "extensions/"
+}
+
+build.dependsOn copyJar
+
+tasks.named('test', Test) {
+    useJUnitPlatform()
+
+    maxHeapSize = '1G'
+
+    testLogging {
+        events "passed"
+    }
+}
